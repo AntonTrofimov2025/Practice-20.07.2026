@@ -12,6 +12,7 @@ class Statuses(models.TextChoices):
     PENDING = 'pending', _('Pending')
     BLOCKED = 'blocked', _('Blocked')
     DONE = 'done', _('Done')
+    CLOSED = 'closed', _('Closed')
 
 class Priorities(models.TextChoices):
     LOW = 'l', _('Low')
