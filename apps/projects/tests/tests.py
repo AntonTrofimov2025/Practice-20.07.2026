@@ -61,7 +61,7 @@ class TestTag(TestCase):
         i = 0
         for project in Project.objects.all():
             for tag in Tag.objects.all():
-                task = Task.objects.create(name=fake.word() + str(i) + str(i),
+                task = Task.objects.create(name=fake.unique.word(),
                                     description=fake.paragraph(nb_sentences=random.randint(2, 5)),
                                     status=random.choice(all_statuses),
                                     priority=random.choice(all_priorities),
@@ -71,7 +71,7 @@ class TestTag(TestCase):
                 task.tags.add(tag)
                 task.save()
                 i += 1
-        another_task = Task.objects.create(name=fake.word() + str(i),
+        another_task = Task.objects.create(name=fake.unique.word(),
                             description=fake.paragraph(nb_sentences=random.randint(2, 5)),
                             status=random.choice(Statuses.NEW),
                             priority=random.choice(Priorities.URGENT),
@@ -81,7 +81,7 @@ class TestTag(TestCase):
                             )
         another_task.tags.add(tag_1)
         another_task.save()
-        another_task = Task.objects.create(name=fake.word() + str(i),
+        another_task = Task.objects.create(name=fake.unique.word(),
                                            description=fake.paragraph(nb_sentences=random.randint(2, 5)),
                                            status=random.choice(Statuses.IN_PROGRESS),
                                            priority=random.choice(Priorities.URGENT),
@@ -91,7 +91,7 @@ class TestTag(TestCase):
                                            )
         another_task.tags.add(tag_1)
         another_task.save()
-        another_task = Task.objects.create(name=fake.word() + str(i),
+        another_task = Task.objects.create(name=fake.unique.word(),
                                            description=fake.paragraph(nb_sentences=random.randint(2, 5)),
                                            status=random.choice(Statuses.IN_PROGRESS),
                                            priority=random.choice(Priorities.URGENT),
