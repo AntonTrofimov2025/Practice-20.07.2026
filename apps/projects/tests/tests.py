@@ -73,8 +73,8 @@ class TestTag(TestCase):
                 i += 1
         another_task = Task.objects.create(name=fake.unique.word(),
                             description=fake.paragraph(nb_sentences=random.randint(2, 5)),
-                            status=random.choice(Statuses.NEW),
-                            priority=random.choice(Priorities.URGENT),
+                            status=Statuses.NEW,
+                            priority=Priorities.URGENT,
                             project=projects[0],
                             assignee=random.choice(all_users),
                             due_date=timezone.now() + timedelta(days=last_day)
@@ -83,8 +83,8 @@ class TestTag(TestCase):
         another_task.save()
         another_task = Task.objects.create(name=fake.unique.word(),
                                            description=fake.paragraph(nb_sentences=random.randint(2, 5)),
-                                           status=random.choice(Statuses.IN_PROGRESS),
-                                           priority=random.choice(Priorities.URGENT),
+                                           status=Statuses.IN_PROGRESS,
+                                           priority=Priorities.URGENT,
                                            project=projects[0],
                                            assignee=random.choice(all_users),
                                            due_date=timezone.now() + timedelta(days=last_day)
@@ -93,8 +93,8 @@ class TestTag(TestCase):
         another_task.save()
         another_task = Task.objects.create(name=fake.unique.word(),
                                            description=fake.paragraph(nb_sentences=random.randint(2, 5)),
-                                           status=random.choice(Statuses.IN_PROGRESS),
-                                           priority=random.choice(Priorities.URGENT),
+                                           status=Statuses.IN_PROGRESS,
+                                           priority=Priorities.URGENT,
                                            project=projects[-2],
                                            assignee=random.choice(all_users),
                                            due_date=timezone.now() + timedelta(days=last_day),
