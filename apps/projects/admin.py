@@ -1,15 +1,30 @@
 from django.conf import settings
 from django.contrib import admin
-from apps.projects.models import Project, Task, Tag, ProjectFile
+from apps.projects.models import (Project, Task,
+                                  Tag, ProjectFile,
+                                  Statuses, Priorities)
+from django.db.models import F, Value
+from django.db.models.functions import Replace
 
 
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'created_at')
+    list_display = ('name', 'created_at', 'show_files_quantity')
     search_fields = ('name',)
 
+    @admin.display(description='Files quantity')
+    def show_files_quantity(self, projects):
+        return projects.files.count()
 
+    @admin.action(description='Replace all spaces to _ symbol')
+    def replace_space_to__(self, request, projects):
+        # for project in projects:
+        #     project.name = project.name.replace(' ', '_')
+        # projects.bulk_update(projects, ['name'])
+        projects.update(name=Replace('name', Value('s'), Value('E')))
+
+    actions = [replace_space_to__]
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
@@ -17,6 +32,19 @@ class TaskAdmin(admin.ModelAdmin):
     list_filter = ('project', 'status', 'priority', 'created_at', 'due_date', 'assignee')
     search_fields =('name',)
 
+    @admin.action(description='Replace specific status to DONE')
+    def replace_status_to_done(self, request, tasks):
+        tasks.update(status=Statuses.DONE)
+
+    actions = [replace_status_to_done]
+
+
+    priorities = [(priority.value, priority.name) for priority in Priorities]
+    for key, value in priorities:
+        add_priority = lambda self, request, tasks, p=key: tasks.update(priority=p)
+        add_priority.__name__ = key
+        add_priority.short_description = f'Change specific priority to {value}'
+        actions.append(add_priority)
 
 
 @admin.register(Tag)

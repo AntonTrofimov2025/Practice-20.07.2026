@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+
+from django.contrib.admindocs.utils import ROLES
 from environ import Env
 
 # Build paths inside the projects like this: BASE_DIR / 'subdir'.
@@ -40,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.projects.apps.ProjectConfig'
+    'apps.projects.apps.ProjectConfig',
+    'apps.user.apps.UserConfig'
 ]
 
 MIDDLEWARE = [
@@ -123,3 +126,66 @@ STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 AUTH_USER_MODEL = 'auth.User'
+
+ROLE_PERMISSION = {
+    'Managers': [
+        'auth.user.add',
+        'auth.user.view',
+        'auth.permission.add',
+        'auth.permission.view',
+        'projects.tag.add',
+        'projects.tag.change',
+        'projects.tag.view',
+        'projects.project.add',
+        'projects.project.view',
+        'projects.project.delete',
+        'projects.project.change',
+        'projects.task.add',
+        'projects.task.change',
+        'projects.task.view',
+        'projects.projectfile.view',
+        'projects.projectfile.add',
+        'projects.projectfile.change',
+        'projects.projectfile.delete'
+        ],
+    'Clients': [
+        'auth.user.add',
+        'auth.user.change',
+        'auth.user.view',
+        'projects.project.add',
+        'projects.project.change',
+        'projects.project.view',
+        'projects.projectfile.add',
+        'projects.projectfile.view',
+        'projects.tag.add',
+        'projects.tag.change',
+        'projects.tag.delete',
+        'projects.tag.view',
+        'projects.task.add',
+        'projects.task.change',
+        'projects.task.delete',
+        'projects.task.view',
+    ],
+    'Developers': [
+            'auth.user.add',
+            'auth.user.change',
+            'auth.user.view',
+            'auth.user.delete',
+            'projects.project.add',
+            'projects.project.change',
+            'projects.project.view',
+            'projects.project.delete',
+            'projects.projectfile.add',
+            'projects.projectfile.change',
+            'projects.projectfile.delete',
+            'projects.projectfile.view',
+            'projects.tag.add',
+            'projects.tag.change',
+            'projects.tag.delete',
+            'projects.tag.view',
+            'projects.task.add',
+            'projects.task.change',
+            'projects.task.delete',
+            'projects.task.view',
+        ]
+}
