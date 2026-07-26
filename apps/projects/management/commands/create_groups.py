@@ -12,14 +12,18 @@ User = get_user_model()
 class Command(BaseCommand):
 
     @staticmethod
-    def add_permission(group, permissions: list[tuple[str, str]] | tuple[str, str]):
+    def add_permission(group, permissions: list[tuple[str, str, str]] | tuple[str, str, str]):
         if isinstance(permissions, tuple):
             permissions = [permissions]
         for key, value, command in permissions:
-            group_content_type = ContentType.objects.filter(app_label=key, model=value).first()
-            for view_group_permission in Permission.objects.filter(content_type=group_content_type):
-                if command in view_group_permission.name:
-                    group.permissions.add(view_group_permission)
+            group_content_type = ContentType.objects.get(app_label=key.lower(),
+                                                         model=value.lower())
+            # for view_group_permission in Permission.objects.filter(content_type=group_content_type):
+            #     if command in view_group_permission.name:
+            #         group.permissions.add(view_group_permission)
+            matched_permissions = Permission.objects.filter(content_type=group_content_type,
+                                                            codename__icontains=command.lower())
+            group.permissions.add(*matched_permissions)
 
     @staticmethod
     def create_permission():
@@ -29,6 +33,7 @@ class Command(BaseCommand):
                 Command.add_permission(group, tuple(permission.split('.')))
 
     def handle(self, *args, **kwargs):
+        # import pdb; pdb.set_trace() # For debugging reasons, s(Step), r(Return), n(Next)
         # managers_group, _ = Group.objects.get_or_create(name='Managers')
         # clients_group, _ = Group.objects.get_or_create(name='Clients')
         # developers_group, _ = Group.objects.get_or_create(name='Developers')

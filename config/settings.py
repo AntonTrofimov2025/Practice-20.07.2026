@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.projects.apps.ProjectConfig',
-    'apps.user.apps.UserConfig'
+    # 'apps.user.apps.UserConfig'
 ]
 
 MIDDLEWARE = [
@@ -129,6 +129,7 @@ AUTH_USER_MODEL = 'auth.User'
 
 ROLE_PERMISSION = {
     'Managers': [
+        'auth.group.view',
         'auth.user.add',
         'auth.user.view',
         'auth.permission.add',

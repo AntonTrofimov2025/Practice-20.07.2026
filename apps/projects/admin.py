@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib import admin
 from apps.projects.models import (Project, Task,
                                   Tag, ProjectFile,
@@ -22,7 +21,7 @@ class ProjectAdmin(admin.ModelAdmin):
         # for project in projects:
         #     project.name = project.name.replace(' ', '_')
         # projects.bulk_update(projects, ['name'])
-        projects.update(name=Replace('name', Value('s'), Value('E')))
+        projects.update(name=Replace('name', Value(' '), Value('_')))
 
     actions = [replace_space_to__]
 
@@ -39,11 +38,11 @@ class TaskAdmin(admin.ModelAdmin):
     actions = [replace_status_to_done]
 
 
-    priorities = [(priority.value, priority.name) for priority in Priorities]
+    priorities = [(priority.name, priority.value) for priority in Priorities]
     for key, value in priorities:
-        add_priority = lambda self, request, tasks, p=key: tasks.update(priority=p)
+        add_priority = lambda self, request, tasks, p=value: tasks.update(priority=p)
         add_priority.__name__ = key
-        add_priority.short_description = f'Change specific priority to {value}'
+        add_priority.short_description = f'Change specific priority to {key}'
         actions.append(add_priority)
 
 
