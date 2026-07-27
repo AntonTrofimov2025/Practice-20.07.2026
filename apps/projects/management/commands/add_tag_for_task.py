@@ -28,16 +28,16 @@ class Command(BaseCommand):
 
 
         # for task in Task.objects.all():
-        #     for users in User.objects.all():
-        #         if users.username == 'Backend':
+        #     for user in User.objects.all():
+        #         if user.username == 'Backend':
         #             task.tags.add(Tag(name='Добавить новый эндпоинт'))
-        #         elif users.username == 'Frontend':
+        #         elif user.username == 'Frontend':
         #             task.tags.add(Tag(name='Обновить страницу ответа 404'))
-        #         elif users.username == 'DevOPS':
+        #         elif user.username == 'DevOPS':
         #             task.tags.add(Tag(name='Обновить страницу ответа 404'))
-        #         elif users.username == 'Q&A':
+        #         elif user.username == 'Q&A':
         #             task.tags.add(Tag(name='Обновить страницу ответа 404'))
-        #         elif users.username == 'Designer':
+        #         elif user.username == 'Designer':
         #             task.tags.add(Tag(name='Обновить страницу ответа 404'))
 
 

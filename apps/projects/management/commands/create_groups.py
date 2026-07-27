@@ -41,7 +41,7 @@ class Command(BaseCommand):
         self.create_permission()
 
         # self.add_permission(managers_group, [('auth', 'group'),
-        #                                      ('auth', 'users'),
+        #                                      ('auth', 'user'),
         #                                      ('auth', 'permission'),
         #                                      ('projects', 'tag'),
         #                                      ('projects', 'task')])

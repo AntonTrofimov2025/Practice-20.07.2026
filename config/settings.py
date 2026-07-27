@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.projects.apps.ProjectConfig',
-    # 'apps.users.apps.UserConfig'
+    # 'apps.user.apps.UserConfig'
 ]
 
 MIDDLEWARE = [
@@ -125,13 +125,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-AUTH_USER_MODEL = 'auth.User' # Switching between auth.User and 'users.User'
+AUTH_USER_MODEL = 'auth.User' # Switching between auth.User and 'user.User'
 
 ROLE_PERMISSION = {
     'Managers': [
         'auth.group.view',
-        'auth.users.add',
-        'auth.users.view',
+        'auth.user.add',
+        'auth.user.view',
         'auth.permission.add',
         'auth.permission.view',
         'projects.tag.add',
@@ -150,9 +150,9 @@ ROLE_PERMISSION = {
         'projects.projectfile.delete'
         ],
     'Clients': [
-        'auth.users.add',
-        'auth.users.change',
-        'auth.users.view',
+        'auth.user.add',
+        'auth.user.change',
+        'auth.user.view',
         'projects.project.add',
         'projects.project.change',
         'projects.project.view',
@@ -168,10 +168,10 @@ ROLE_PERMISSION = {
         'projects.task.view',
     ],
     'Developers': [
-            'auth.users.add',
-            'auth.users.change',
-            'auth.users.view',
-            'auth.users.delete',
+            'auth.user.add',
+            'auth.user.change',
+            'auth.user.view',
+            'auth.user.delete',
             'projects.project.add',
             'projects.project.change',
             'projects.project.view',
