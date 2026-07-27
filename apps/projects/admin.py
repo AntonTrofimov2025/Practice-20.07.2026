@@ -31,19 +31,19 @@ class TaskAdmin(admin.ModelAdmin):
     list_filter = ('project', 'status', 'priority', 'created_at', 'due_date', 'assignee')
     search_fields =('name',)
 
-    @admin.action(description='Replace specific status to DONE')
+    @admin.action(description='Replace specific status to Done')
     def replace_status_to_done(self, request, tasks):
         tasks.update(status=Statuses.DONE)
 
     actions = [replace_status_to_done]
 
 
-    priorities = [(priority.name, priority.value) for priority in Priorities]
-    for key, value in priorities:
-        add_priority = lambda self, request, tasks, p=value: tasks.update(priority=p)
-        add_priority.__name__ = key
-        add_priority.short_description = f'Change specific priority to {key}'
-        actions.append(add_priority)
+    priorities = [(priority.name, priority.value, priority.label) for priority in Priorities]
+    for key, value, label in priorities:
+        change_priority = lambda self, request, tasks, p=value: tasks.update(priority=p)
+        change_priority.__name__ = key
+        change_priority.short_description = f'Change specific priority to {label}'
+        actions.append(change_priority)
 
 
 @admin.register(Tag)

@@ -29,8 +29,8 @@ class Command(BaseCommand):
     def create_permission():
         for key, value in ROLE_PERMISSION.items():
             group, _ = Group.objects.get_or_create(name=key)
-            for permission in value:
-                Command.add_permission(group, tuple(permission.split('.')))
+            permission_list = [tuple(permission.split('.')) for permission in value]
+            Command.add_permission(group, permission_list)
 
     def handle(self, *args, **kwargs):
         # import pdb; pdb.set_trace() # For debugging reasons, s(Step), r(Return), n(Next)
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         self.create_permission()
 
         # self.add_permission(managers_group, [('auth', 'group'),
-        #                                      ('auth', 'user'),
+        #                                      ('auth', 'users'),
         #                                      ('auth', 'permission'),
         #                                      ('projects', 'tag'),
         #                                      ('projects', 'task')])
