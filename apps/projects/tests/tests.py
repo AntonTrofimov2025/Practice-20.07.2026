@@ -5,11 +5,13 @@ from apps.projects.models import (Tag, Project,
                                   )
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from django.db.models import Q, F, Count, Max
+from django.db.models import Q, F, Count, Max, Avg, ExpressionWrapper
+from django.db.models.functions import ExtractWeekDay, ExtractIsoWeekDay
 from datetime import datetime, timedelta
 from faker import Faker
 import random
 from django.contrib.auth import get_user_model
+# from django.contrib.auth.models import User
 import calendar
 
 class TestTag(TestCase):
@@ -186,4 +188,33 @@ class TestTag(TestCase):
     def test_upd_priority(self):
         one_month_ago = timezone.now() - timedelta(weeks=5)
         self.assertEqual(Task.objects.filter(project__name='New titanic project :D', created_at__lt=one_month_ago).update(priority=Priorities.CRITICAL), 1)
+
+    def test_current_month(self):
+        cur_date = timezone.now()
+        for project in Project.objects.filter(created_at__gte=datetime(cur_date.year, cur_date.month, 1)):
+            self.assertEqual(project.created_at.month, timezone.now().month)
+
+    def test_files_per_week_day(self):
+        cur_day = timezone.now().isoweekday()
+        for projectfile in ProjectFile.objects.annotate(day_of_weak=ExtractIsoWeekDay('created_at')).filter(day_of_weak=cur_day):
+            self.assertEqual(projectfile.created_at.isoweekday(), cur_day)
+
+    def test_projects_all(self):
+        self.assertGreater(Project.objects.all().count(), 1)
+
+    def test_count_files_by_project(self):
+        # self.assertEqual(ProjectFile.objects.values('projects__name').annotate(files_count=Count('id')).
+        #                  values('projects__name', 'files_count').count(), 1)
+        for project in Project.objects.values('name').annotate(files_count=Count('files__id')).values('name', 'files_count'):
+            print(project['name'], project['files_count'])
+            self.assertEqual(project['files_count'], Project.objects.get(name=project['name']).files.count())
+
+    def test_avg_avg_tasks_quan(self):
+        self.assertEqual(Project.objects.annotate(tasks_count=Count('tasks__id')).aggregate(avg_tasks=Avg('tasks_count'))['avg_tasks'], 7.25)
+
+    def test_tasks_per_user(self):
+        User = get_user_model()
+        for user in User.objects.values('username').annotate(tasks_count=Count('tasks__id')).values('username', 'tasks_count'):
+            print(f'Username: {user['username']}, tasks count: {user['tasks_count']}')
+            self.assertEqual(user['tasks_count'], User.objects.get(username=user['username']).tasks.count())
 
