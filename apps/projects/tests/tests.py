@@ -13,6 +13,7 @@ import random
 from django.contrib.auth import get_user_model
 # from django.contrib.auth.models import User
 import calendar
+from django.core.paginator import Paginator
 
 class TestTag(TestCase):
 
@@ -28,7 +29,11 @@ class TestTag(TestCase):
         now = timezone.now()
         _, last_day = calendar.monthrange(now.year, now.month)
         User = get_user_model()
-        User.objects.create(first_name='da', last_name='das', username='das')
+        User.objects.create(first_name='da1', last_name='das', username='das1')
+        User.objects.create(first_name='da2', last_name='das2', username='das2')
+        User.objects.create(first_name='da3', last_name='das3', username='das3')
+        User.objects.create(first_name='da4', last_name='das4', username='das4')
+        User.objects.create(first_name='da5', last_name='das5', username='das5')
         all_statuses = [choice.value for choice in Statuses]
         all_priorities = [choice.value for choice in Priorities]
         all_users = [user for user in User.objects.all()]
@@ -65,6 +70,9 @@ class TestTag(TestCase):
                                     description=fake.paragraph(nb_sentences=random.randint(2, 5)),
                                     status=random.choice(all_statuses),
                                     priority=random.choice(all_priorities),
+                                    due_date=fake.date_between_dates(timezone.make_aware(
+                                        datetime(2026, 9, 1)),
+                                        timezone.make_aware(datetime(2027, 4, 15))) ,
                                     project=project,
                                     assignee=random.choice(all_users)
                                     )
@@ -217,4 +225,28 @@ class TestTag(TestCase):
         for user in User.objects.values('username').annotate(tasks_count=Count('tasks__id')).values('username', 'tasks_count'):
             print(f'Username: {user['username']}, tasks count: {user['tasks_count']}')
             self.assertEqual(user['tasks_count'], User.objects.get(username=user['username']).tasks.count())
+
+    def test_sort_tasks(self):
+        for task in Task.objects.order_by('priority', 'due_date').values('name', 'priority', 'due_date'):
+            print(task)
+            assert 'name' in task
+            assert 'due_date' in task
+            assert task['due_date'] is not None
+
+    def test_sort_users_by_tasks(self):
+        User = get_user_model()
+        for user in User.objects.values('username').annotate(tasks_count=Count('tasks__id')
+                                                 ).order_by('-tasks_count').values('username', 'tasks_count'):
+            print(user)
+
+    def test_all_tasks_with_pagination(self):
+        all_tasks = Task.objects.all().values('name', 'status', 'priority', 'assignee__username').order_by('id')
+        pagination = Paginator(all_tasks, per_page=10)
+        # for page_number in range(1, pagination.num_pages + 1):
+        for page_number in pagination.page_range:
+            page = pagination.get_page(page_number)
+            print(page)
+            for task in page:
+                print(task)
+            print("-" * 50)
 
