@@ -272,11 +272,11 @@ class TestTag(APITestCase):
         assert 'id' in response.data
 
     def test_detail_api_patch(self):
-        self.client = APIClient()
         our_tag = Tag.objects.first()
         tag_name = {'name': 'tony'}
         response = self.client.patch(reverse('tag-detail-view', args=[our_tag.id]), data=tag_name)
         self.assertEqual(response.status_code, 200)
-        our_tag.refresh_from_db()
+        # our_tag.refresh_from_db()
+        our_tag = Tag.objects.get(id=our_tag.id)
         assert our_tag.name == 'tony'
 
