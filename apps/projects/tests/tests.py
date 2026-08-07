@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 from apps.projects.serializers import TagSerializer, ProjectSerializer
 from dateutil.parser import parse
-
+from pathlib import Path
 from apps.projects.models import (Tag, Project,
                                   ProjectFile, Task,
                                   Statuses, Priorities,
@@ -21,6 +21,7 @@ from django.contrib.auth import get_user_model
 # from django.contrib.auth.models import User
 import calendar
 from django.core.paginator import Paginator
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 class TestTag(APITestCase):
 
@@ -307,4 +308,52 @@ class TestTag(APITestCase):
             self.assertEqual(parse(project.created_at).day, timezone.now().day)
             self.assertEqual(parse(project.created_at).month, timezone.now().month)
             self.assertEqual(parse(project.created_at).year, timezone.now().year)
+
+    def test_upload_file(self):
+        project_id = Project.objects.first().id
+        file_path = Path(__file__).resolve().parent.parent.parent.parent.joinpath('media', 'projects', 'ls4_combined.py')
+        with open(file_path, 'rb') as fl:
+            response = self.client.post(reverse('file-list-view'), data={
+                "name": "hey :DDD",
+                "file": fl,
+                "projects": project_id
+            }, format='multipart')
+            self.assertEqual(response.status_code, 201)
+            self.assertEqual(response.data['name'], 'hey :DDD')
+
+    def test_file_size_too_big_generated(self):
+        project_id = Project.objects.first().id
+        our_content = b"0" * int(2.5 * 1024 * 1024)
+        big_data = SimpleUploadedFile('too_big_file_xD.txt', content=our_content, content_type='text/plain')
+        response = self.client.post(reverse('file-list-view'), data={
+            "name": "Big file x)",
+            "file": big_data,
+            "projects": project_id
+        }, format='multipart')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('File size too big', response.data['file'])
+
+    def test_file_size_too_big(self):
+        project_id = Project.objects.first().id
+        file_path = Path(__file__).resolve().parent.parent.parent.parent.joinpath('media', 'projects', 'valid_passwords.txt')
+        with open(file_path, 'rb') as fl:
+            response = self.client.post(reverse('file-list-view'), data={
+                "name": "Big passwords file :)",
+                "file": fl,
+                "projects": project_id
+            }, format='multipart')
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('File size too big', response.data['file'])
+
+    def test_file_extension_error(self):
+        project_id = Project.objects.first().id
+        file_path = Path(__file__).resolve().parent.parent.parent.parent.joinpath('media', 'projects', 'terraform-test2.7z')
+        with open(file_path, 'rb') as fl:
+            response = self.client.post(reverse('file-list-view'), data={
+                "name": "Not specified file extension :)",
+                "file": fl,
+                "projects": project_id
+            }, format='multipart')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('This extension is not allowed!', response.data['file'])
 

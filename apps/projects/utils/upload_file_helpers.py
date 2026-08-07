@@ -10,18 +10,21 @@ def validate_extension(file):
         raise serializers.ValidationError('This extension is not allowed!')
     return file
 
-def validate_size(path):
+def is_size_acceptable(path):
     return os.path.getsize(path) / 1024 / 1024 < 2
 
 def validate_file_size(file):
     if file.size / 1024 / 1024 > 2:
         raise serializers.ValidationError('File size too big')
 
-def create_path(value):
-    os.makedirs(value, exist_ok=True)
+
+# Both functions are not necessary to implement due to Django's internal validations.
+# They both are already on board and had been implemented by Django devs.
+def create_path(path):
+    os.makedirs(path, exist_ok=True)
 
 def save_file(path, data_chunks):
-    with open(path, 'w', encoding='utf-8') as file:
+    with open(path, 'wb') as file: # wb instead of w, because of the nature of binary files
         for chuck in data_chunks:
             file.write(chuck)
-
+####################################################################################

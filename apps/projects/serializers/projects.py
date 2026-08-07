@@ -14,7 +14,7 @@ class AllProjectFilesSerializer(serializers.ModelSerializer):
 
 
 class CreateProjectFileSerializer(serializers.ModelSerializer):
-    file = serializers.FileField(validators=[validate_extension, validate_file_size])
+    # file = serializers.FileField(validators=[validate_extension, validate_file_size])
 
     class Meta:
         model = ProjectFile

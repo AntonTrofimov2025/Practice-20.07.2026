@@ -34,5 +34,5 @@ urlpatterns = [
     path('tags/', TagListCreateApiView.as_view(), name='tag-list-view'),
     path('tags/<uuid:pk>', TagDetailApiView.as_view(), name='tag-detail-view'),
     path('files/', ProjectFileListAPIView.as_view(), name='file-list-view'),
-    path('files/<uuid:pk>', ProjectDetailApiView.as_view(), name='file-list-view')
+    path('files/<uuid:pk>', ProjectDetailApiView.as_view(), name='file-detail-view')
 ]

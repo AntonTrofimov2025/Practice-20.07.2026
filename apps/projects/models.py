@@ -4,6 +4,7 @@ import uuid
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinLengthValidator, FileExtensionValidator
 from django.conf import settings
+from apps.projects.utils.upload_file_helpers import validate_extension, validate_file_size
 
 
 class Statuses(models.TextChoices):
@@ -98,7 +99,9 @@ class Tag(UniqueID, TimeStampedModel):
 
 class ProjectFile(UniqueID, TimeStampedModel):
     name = models.CharField(max_length=120, verbose_name='File name')
-    file = models.FileField(upload_to='projects/', validators=[FileExtensionValidator(allowed_extensions=['.pdf', '.csv', '.doc', '.xlsx', '.py', '.txt'])])
+    file = models.FileField(upload_to='projects/',
+    validators=[validate_extension, FileExtensionValidator(allowed_extensions=['pdf', 'csv', 'doc', 'xlsx', 'py', 'txt']),
+                validate_file_size])
 
     def __str__(self):
         return f'ProjectFile: name {self.name}, path {self.file}'
