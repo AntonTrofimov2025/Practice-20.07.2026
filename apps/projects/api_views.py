@@ -2,8 +2,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
-from apps.projects.models import Tag, Project
-from apps.projects.serializers import TagSerializer, ProjectSerializer
+from apps.projects.models import Tag, Project, ProjectFile
+from apps.projects.serializers import (TagSerializer, ProjectSerializer,
+                            AllProjectFilesSerializer, CreateProjectFileSerializer)
 from datetime import datetime, timedelta
 
 
@@ -90,3 +91,41 @@ class ProjectDetailApiView(APIView):
         tag.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class ProjectFileListAPIView(APIView):
+
+    def get(self, request):
+        all_pr_files = ProjectFile.objects.prefetch_related('projects').all()
+
+        if name := request.query_params.get('name'):
+            all_pr_files = all_pr_files.filter(name=name)
+
+        serializer = AllProjectFilesSerializer(all_pr_files, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = CreateProjectFileSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class ProjectFileDetailAPIView(APIView):
+
+    def get(self, request, pk):
+        pr_file = get_object_or_404(ProjectFile, pk=pk)
+        serializer = AllProjectFilesSerializer(pr_file)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk, partial=False):
+        pr_file = get_object_or_404(ProjectFile, pk=pk)
+        serializer = CreateProjectFileSerializer(pr_file, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        return self.put(request, pk, partial=True)
+
+    def delete(self, request, pk):
+        pr_file = get_object_or_404(ProjectFile, pk=pk)
+        pr_file.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
