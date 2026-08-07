@@ -19,11 +19,12 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views as projects_
-from apps.projects.api_views import TagListCreateApiView, TagDetailApiView
+from apps.projects.api_views import (TagListCreateApiView, TagDetailApiView,
+                                     ProjectListApiView, ProjectDetailApiView)
 
 urlpatterns = [
-    path('projects/', projects_.get_all_projects),
-    path('projects/<uuid:pk>', projects_.get_project_by_id),
+    path('projects/', ProjectListApiView.as_view(), name='project-list-view'),
+    path('projects/<uuid:pk>', ProjectDetailApiView.as_view(), name='project-detail-view'),
     path('tasks/', projects_.get_all_tasks),
     path('tasks/<uuid:pk>', projects_.get_task_by_id),
     path('tasks/<uuid:pk>/info', projects_.get_task_info),

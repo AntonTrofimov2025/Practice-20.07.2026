@@ -3,7 +3,8 @@ from django.urls import reverse
 from django.forms.models import model_to_dict
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
-from apps.projects.serializers import TagSerializer
+from apps.projects.serializers import TagSerializer, ProjectSerializer
+from dateutil.parser import parse
 
 from apps.projects.models import (Tag, Project,
                                   ProjectFile, Task,
@@ -261,22 +262,49 @@ class TestTag(APITestCase):
         assert len(response.data) >= 1
 
     def test_tag_api(self):
-        tag = {'name': 'helloy'}
-        response = self.client.post(reverse('tag-list-view'), data=tag)
+        tag_name = {'name': 'helloy'}
+        response = self.client.post(reverse('tag-list-view'), data=tag_name)
         assert response.data['name'] == 'helloy'
 
     def test_detail_api(self):
         our_tag = Tag.objects.all().first()
-        response = self.client.get(reverse('tag-detail-view', args=[our_tag.id]))
+        response = self.client.get(reverse('tag-detail-view', args=[our_tag.id]), format='json')
         assert len(response.data) > 1
         assert 'id' in response.data
 
-    def test_detail_api_patch(self):
+    def test_detail_api_patch(self, method='patch'):
         our_tag = Tag.objects.first()
+        tag_id = str(our_tag.id)
         tag_name = {'name': 'tony'}
-        response = self.client.patch(reverse('tag-detail-view', args=[our_tag.id]), data=tag_name)
+        if method == 'patch':
+            response = self.client.patch(reverse('tag-detail-view', args=[our_tag.id]), data=tag_name, format='json')
+        elif method == 'put':
+            response = self.client.put(reverse('tag-detail-view', args=[our_tag.id]), data=tag_name, format='json')
+        else:
+            raise ValueError('method must be either put or patch!')
         self.assertEqual(response.status_code, 200)
-        # our_tag.refresh_from_db()
-        our_tag = Tag.objects.get(id=our_tag.id)
-        assert our_tag.name == 'tony'
+        our_tag.refresh_from_db()
+        # our_tag = Tag.objects.get(id=our_tag.id)
+        # assert our_tag.name == 'tony'
+        serialized = TagSerializer(our_tag).data
+        self.assertEqual({k: v for k, v in serialized.items() if k in {'id', 'name'}},
+                         {'id': tag_id, 'name': 'tony'})
+
+    def test_detail_api_put(self):
+        return self.test_detail_api_patch(method='put')
+
+    def test_delete_tag_api(self):
+        our_tag_id = Tag.objects.first().id
+        response = self.client.delete(reverse('tag-detail-view', args=[our_tag_id]), format='json')
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Tag.objects.filter(id=our_tag_id).exists())
+
+    def test_project_get_params(self):
+        response = self.client.get(reverse('project-list-view'),
+        query_params={'date_from': timezone.now().strftime('%d-%m-%Y'), 'date_to': timezone.now().strftime('%d-%m-%Y')}, format='json')
+        for item in response.data:
+            project = Project(**item)
+            self.assertEqual(parse(project.created_at).day, timezone.now().day)
+            self.assertEqual(parse(project.created_at).month, timezone.now().month)
+            self.assertEqual(parse(project.created_at).year, timezone.now().year)
 
