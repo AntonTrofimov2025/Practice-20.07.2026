@@ -16,6 +16,7 @@ def is_size_acceptable(path):
 def validate_file_size(file):
     if file.size / 1024 / 1024 > 2:
         raise serializers.ValidationError('File size too big')
+    return file
 
 
 # Both functions are not necessary to implement due to Django's internal validations.
