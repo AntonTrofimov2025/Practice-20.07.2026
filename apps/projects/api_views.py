@@ -6,6 +6,7 @@ from apps.projects.models import Tag, Project, ProjectFile
 from apps.projects.serializers import (TagSerializer, ProjectSerializer,
                             AllProjectFilesSerializer, CreateProjectFileSerializer)
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 
 class TagListCreateApiView(APIView):
@@ -48,17 +49,26 @@ class ProjectListApiView(APIView):
     def get(self, request):
         all_projects = Project.objects.all()
 
+        if project_name := request.query_params.get('name'):
+            all_projects = all_projects.filter(name__icontains=project_name)
+
         date_from = request.query_params.get('date_from')
         date_to = request.query_params.get('date_to')
 
         if date_from and date_to:
             try:
-                date_from = datetime.strptime(date_from, '%d-%m-%Y').astimezone()
-                date_to = datetime.strptime(date_to, '%d-%m-%Y').astimezone() + timedelta(hours=23, minutes=59, seconds=59)
+                # date_from = datetime.strptime(date_from, '%d-%m-%Y').astimezone()
+                # date_to = datetime.strptime(date_to, '%d-%m-%Y').astimezone() + timedelta(hours=23, minutes=59, seconds=59)
+                date_from = timezone.make_aware(datetime.strptime(date_from, '%d-%m-%Y'))
+                date_to = timezone.make_aware(datetime.strptime(date_to, '%d-%m-%Y'))
 
-                all_projects = all_projects.filter(created_at__gte=date_from, created_at__lte=date_to)
-            except Exception:
-                pass
+                # all_projects = all_projects.filter(created_at__gte=date_from, created_at__lte=date_to)
+                all_projects = all_projects.filter(created_at__date__range=(date_from.date(), date_to.date()))
+            except ValueError:
+                return Response(
+                    {"error": "Incorrect date format. Use DD-MM-YYYY (for instance, 12-12-2024)"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         serializer = ProjectSerializer(all_projects, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
