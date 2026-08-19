@@ -304,6 +304,7 @@ class TestTag(APITestCase):
         response = self.client.get(reverse('project-list-view'),
         query_params={'date_from': timezone.now().strftime('%d-%m-%Y'), 'date_to': timezone.now().strftime('%d-%m-%Y')}, format='json')
         for item in response.data:
+            item.pop('count_of_files', None)
             project = Project(**item)
             self.assertEqual(parse(project.created_at).day, timezone.now().day)
             self.assertEqual(parse(project.created_at).month, timezone.now().month)
@@ -364,7 +365,7 @@ class TestTag(APITestCase):
         for project in response.data:
             self.assertIn('count_of_files', project)
 
-    def test_task_by_name(self):
+    def test_create_task_by_name(self):
         project = Project.objects.first()
         fake = Faker()
         User = get_user_model()
@@ -380,7 +381,7 @@ class TestTag(APITestCase):
         response = self.client.post(reverse('task-by-name'), data=task, format='json')
         self.assertEqual(response.status_code, 201)
 
-    def test_task_create_update(self):
+    def test_task_update_delete(self):
         task = Task.objects.last()
         response = self.client.get(reverse('task-detail-view', args=[task.id]))
         self.assertEqual(response.status_code, 200)

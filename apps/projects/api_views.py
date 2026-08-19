@@ -5,7 +5,8 @@ from rest_framework.generics import get_object_or_404
 from apps.projects.models import Tag, Project, ProjectFile, Task
 from apps.projects.serializers import (TagSerializer, ProjectSerializer,
                             AllProjectFilesSerializer, CreateProjectFileSerializer,
-                                       TaskSerializer, TaskDetailSerializer)
+                                       TaskSerializer, TaskDetailSerializer,
+                                       TaskCreateUpdateSerializer)
 from datetime import datetime, timedelta
 from django.utils import timezone
 
@@ -22,7 +23,7 @@ class TaskDetailAPIView(APIView):
 
     def put(self, request, pk, partial=False):
         task = self.get_task(pk)
-        serializer = TaskSerializer(task, data=request.data, partial=partial)
+        serializer = TaskCreateUpdateSerializer(task, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -34,6 +35,7 @@ class TaskDetailAPIView(APIView):
         task = self.get_task(pk)
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 class TagListCreateApiView(APIView):
 
     def get(self, request):

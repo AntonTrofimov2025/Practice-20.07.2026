@@ -1,6 +1,7 @@
 from rest_framework import status
 from apps.projects.serializers import (ProjectSerializer,
                                        TaskSerializer,
+                                TaskCreateUpdateSerializer,
                                        TagSerializer,
                                        TaskInfoSerializer)
 from rest_framework.decorators import api_view
@@ -47,11 +48,20 @@ def get_task_by_id(request, pk):
 
 @api_view(['POST'])
 def post_task_by_name(request):
-    project = get_object_or_404(Project, name=request.data['project'])
-    request.data['project'] = project.id
-    serializer = TaskSerializer(data=request.data)
+    serializer = TaskCreateUpdateSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
+    serializer.save()
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+# @api_view(['POST'])
+# def post_task_by_name(request):
+#     project = get_object_or_404(Project, name=request.data['project'])
+#     request_data = request.data.copy()
+#     request_data['project'] = project.id
+#     serializer = TaskCreateUpdateSerializer(data=request_data)
+#     serializer.is_valid(raise_exception=True)
+#     serializer.save()
+#     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['GET', 'POST'])
 def post_or_show_all_tags(request):
