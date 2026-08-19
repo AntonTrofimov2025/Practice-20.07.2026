@@ -1,11 +1,14 @@
 from rest_framework import serializers
 from apps.projects.models import Project, ProjectFile
 from apps.projects.utils.upload_file_helpers import validate_extension, validate_file_size
+from apps.projects.utils.upload_file_helpers import create_path
+from config.settings import MEDIA_ROOT
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'name', 'created_at']
+        fields = ['id', 'name', 'description', 'created_at', 'count_of_files']
+        read_only_fields = ['count_of_files']
 
 class AllProjectFilesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,8 +28,8 @@ class CreateProjectFileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('File name is not in ASCII!')
         return value
 
-    # def create(self, validated_data):
-    #     if validated_data
-    #
-    #     return super().create(validated_data)
+    def create(self, validated_data):
+        create_path(MEDIA_ROOT / 'projects')
+
+        return super().create(validated_data)
 

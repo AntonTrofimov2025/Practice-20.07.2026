@@ -311,7 +311,8 @@ class TestTag(APITestCase):
 
     def test_upload_file(self):
         project_id = Project.objects.first().id
-        file_path = Path(__file__).resolve().parent.parent.parent.parent.joinpath('media', 'projects', 'ls4_combined.py')
+        # file_path = Path().resolve().joinpath('media', 'projects', 'ls4_combined.py')
+        file_path = Path().resolve() / 'media' / 'projects' / 'ls4_combined.py'
         with open(file_path, 'rb') as fl:
             response = self.client.post(reverse('file-list-view'), data={
                 "name": "hey :DDD",
@@ -356,4 +357,37 @@ class TestTag(APITestCase):
             }, format='multipart')
         self.assertEqual(response.status_code, 400)
         self.assertIn('This extension is not allowed!', response.data['file'])
+
+    def test_project_files_count(self):
+        response = self.client.get(reverse('project-list-view'))
+        self.assertEqual(response.status_code, 200)
+        for project in response.data:
+            self.assertIn('count_of_files', project)
+
+    def test_task_by_name(self):
+        project = Project.objects.first()
+        fake = Faker()
+        User = get_user_model()
+        task = {'name': 'fake.unique.word()',
+                'description': fake.paragraph(nb_sentences=random.randint(2, 5)),
+                'status': random.choice(Statuses.values),
+                'priority': random.choice(Priorities.values),
+                'due_date': fake.date_between_dates(timezone.make_aware(
+                    datetime(2026, 9, 1)),
+                    timezone.make_aware(datetime(2027, 4, 15))) ,
+                'project': project.name,
+                'assignee': User.objects.first().id}
+        response = self.client.post(reverse('task-by-name'), data=task, format='json')
+        self.assertEqual(response.status_code, 201)
+
+    def test_task_create_update(self):
+        task = Task.objects.last()
+        response = self.client.get(reverse('task-detail-view', args=[task.id]))
+        self.assertEqual(response.status_code, 200)
+        data = {'name': 'test_patch'}
+        response = self.client.patch(reverse('task-detail-view', args=[task.id]), data=data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['name'], 'test_patch')
+        response = self.client.delete(reverse('task-detail-view', args=[task.id]))
+        self.assertEqual(response.status_code, 204)
 

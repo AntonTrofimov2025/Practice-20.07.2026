@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 import uuid
+from django.contrib.auth import get_user_model
+from django.db.models import Count
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinLengthValidator, FileExtensionValidator
 from django.conf import settings
@@ -43,6 +45,13 @@ class Project(UniqueID, TimeStampedModel):
     name = models.CharField(max_length=100, unique=True, verbose_name="Project's name")
     description = models.TextField(verbose_name='Description')
     files = models.ManyToManyField('ProjectFile', related_name='projects', verbose_name='Files')
+    users = models.ForeignKey(get_user_model(), null=True, related_name='project', on_delete=models.CASCADE,
+                              verbose_name='Users')
+
+    @property
+    def count_of_files(self):
+        # return Project.objects.aggregate(count_of_files=Count('files__id'))['count_of_files']
+        return self.files.count()
 
     def __str__(self):
         return f'Project: {self.name}'

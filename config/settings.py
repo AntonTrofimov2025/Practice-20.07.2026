@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'apps.projects.apps.ProjectConfig',
-    # 'apps.user.apps.UserConfig'
+    'apps.user.apps.UserConfig'
 ]
 
 MIDDLEWARE = [
@@ -126,7 +126,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-AUTH_USER_MODEL = 'auth.User' # Switching between auth.User and 'user.User'
+MEDIA_PROJECTS = 'projects'
+AUTH_USER_MODEL = 'user.User' # Switching between auth.User and 'user.User'
 
 ROLE_PERMISSION = {
     'Managers': [

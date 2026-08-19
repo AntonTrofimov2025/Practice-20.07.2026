@@ -45,6 +45,14 @@ def get_task_by_id(request, pk):
     serializer = TaskSerializer(task_by_id)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+@api_view(['POST'])
+def post_task_by_name(request):
+    project = get_object_or_404(Project, name=request.data['project'])
+    request.data['project'] = project.id
+    serializer = TaskSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 @api_view(['GET', 'POST'])
 def post_or_show_all_tags(request):
     if request.method == 'GET':

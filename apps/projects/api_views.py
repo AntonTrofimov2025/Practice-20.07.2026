@@ -2,13 +2,38 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
-from apps.projects.models import Tag, Project, ProjectFile
+from apps.projects.models import Tag, Project, ProjectFile, Task
 from apps.projects.serializers import (TagSerializer, ProjectSerializer,
-                            AllProjectFilesSerializer, CreateProjectFileSerializer)
+                            AllProjectFilesSerializer, CreateProjectFileSerializer,
+                                       TaskSerializer, TaskDetailSerializer)
 from datetime import datetime, timedelta
 from django.utils import timezone
 
 
+class TaskDetailAPIView(APIView):
+
+    def get_task(self, pk):
+        return get_object_or_404(Task, pk=pk)
+
+    def get(self, request, pk):
+        task = self.get_task(pk)
+        serializer = TaskDetailSerializer(task)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk, partial=False):
+        task = self.get_task(pk)
+        serializer = TaskSerializer(task, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        return self.put(request, pk, partial=True)
+
+    def delete(self, request, pk):
+        task = self.get_task(pk)
+        task.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 class TagListCreateApiView(APIView):
 
     def get(self, request):
@@ -138,4 +163,10 @@ class ProjectFileDetailAPIView(APIView):
     def delete(self, request, pk):
         pr_file = get_object_or_404(ProjectFile, pk=pk)
         pr_file.delete()
+        import os
+        from config.settings import MEDIA_ROOT, MEDIA_PROJECTS
+        try:
+            os.remove(MEDIA_ROOT / MEDIA_PROJECTS / pr_file.name)
+        except FileNotFoundError:
+            pass
         return Response(status=status.HTTP_204_NO_CONTENT)
