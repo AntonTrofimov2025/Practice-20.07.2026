@@ -3,10 +3,10 @@ from rest_framework import serializers
 
 
 def is_extension(value):
-    return value.split('.')[-1] in ['pdf', 'csv', 'doc', 'xlsx', 'py']
+    return value.split('.')[-1] in ['pdf', 'csv', 'doc', 'xlsx', 'py', 'txt', 'png', 'jpeg', 'jpg']
 
 def validate_extension(file):
-    if file.name.split('.')[-1] not in ['pdf', 'csv', 'doc', 'xlsx', 'py', 'txt']:
+    if file.name.split('.')[-1] not in ['pdf', 'csv', 'doc', 'xlsx', 'py', 'txt', 'png', 'jpeg', 'jpg']:
         raise serializers.ValidationError('This extension is not allowed!')
     return file
 

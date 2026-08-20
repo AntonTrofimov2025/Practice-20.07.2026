@@ -42,13 +42,21 @@ class DownloadProjectFileView(RetrieveAPIView):
         # file = open(obj.file.path, 'rb')
         # # file = DownloadsFileSerializer(data=request.data)
         # # file.is_valid()
-        object_ = self.get_object()
         try:
-            file = object_.file.open('rb')
-            return FileResponse(file, as_attachment=True, filename=object_.name,
-                                # content_type=content_type
-                                )
-        except FileNotFoundError:
+            instance = self.get_object()
+        except Http404:
             # return Response(status=status.HTTP_404_NOT_FOUND)
-            raise Http404('File not found')
+            raise Http404("File not found, we're sorry")
+
+        # if instance.file.storage.exists(instance.file.name):
+        #     raise Http404('File not found')
+
+
+        file = instance.file.open('rb')
+        return FileResponse(file, as_attachment=True, filename=instance.name,
+                            # content_type=content_type
+                            )
+        # except FileNotFoundError:
+        #     # return Response(status=status.HTTP_404_NOT_FOUND)
+        #     raise Http404('File not found')
 

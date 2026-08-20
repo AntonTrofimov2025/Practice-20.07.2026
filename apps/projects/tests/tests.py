@@ -433,4 +433,10 @@ class TestTag(APITestCase):
         print(str(b''.join(response.streaming_content)))
         self.assertEqual(project_file.name, response.filename)
 
+    def test_get_project_file_negative(self):
+        from uuid import UUID
+        response = self.client.get(reverse('file-retrieve-view', args=[UUID('1e096a4c-9596-0000-a690-93a5c7dc600d')]))
+        self.assertEqual(response.status_code, 404)
+        # self.assertIn('No ProjectFile matches the given query.', response.data['detail'])
+        self.assertIn("File not found, we're sorry", response.data['detail'])
 

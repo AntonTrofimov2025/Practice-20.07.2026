@@ -109,7 +109,8 @@ class Tag(UniqueID, TimeStampedModel):
 class ProjectFile(UniqueID, TimeStampedModel):
     name = models.CharField(max_length=120, verbose_name='File name')
     file = models.FileField(upload_to='projects/',
-    validators=[validate_extension, FileExtensionValidator(allowed_extensions=['pdf', 'csv', 'doc', 'xlsx', 'py', 'txt']),
+    validators=[validate_extension, FileExtensionValidator(allowed_extensions=['pdf', 'csv', 'doc', 'xlsx', 'py', 'txt',
+                                                                               'png', 'jpeg', 'jpg']),
                 validate_file_size])
 
     def __str__(self):
