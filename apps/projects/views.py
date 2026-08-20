@@ -47,7 +47,7 @@ def get_task_by_id(request, pk):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-def post_task_by_name(request):
+def post_task(request):
     serializer = TaskCreateUpdateSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     serializer.save()

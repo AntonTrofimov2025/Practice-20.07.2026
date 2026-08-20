@@ -10,6 +10,7 @@ from apps.projects.models import (Tag, Project,
                                   ProjectFile, Task,
                                   Statuses, Priorities,
                                   )
+from apps.user.models import Positions
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from django.db.models import Q, F, Count, Max, Avg, ExpressionWrapper
@@ -37,7 +38,7 @@ class TestTag(APITestCase):
         now = timezone.now()
         _, last_day = calendar.monthrange(now.year, now.month)
         User = get_user_model()
-        User.objects.create(first_name='da1', last_name='das', username='das1')
+        User.objects.create(first_name='da1', last_name='das', username='das1', email='helloy@yahoo.com')
         User.objects.create(first_name='da2', last_name='das2', username='das2')
         User.objects.create(first_name='da3', last_name='das3', username='das3')
         User.objects.create(first_name='da4', last_name='das4', username='das4')
@@ -59,7 +60,8 @@ class TestTag(APITestCase):
                             created_at=timezone.now())
                     for _ in range(10)]
         projects += [Project(name='New titanic project :D',
-                          description='blablabla'),
+                          description='blablabla',
+                             users=random.choice(User.objects.all())),
                   Project(name='Another titanic',
                           description='blabla')]
         Project.objects.bulk_create(projects)
@@ -212,8 +214,11 @@ class TestTag(APITestCase):
 
     def test_files_per_week_day(self):
         cur_day = timezone.now().isoweekday()
-        for projectfile in ProjectFile.objects.annotate(day_of_weak=ExtractIsoWeekDay('created_at')).filter(day_of_weak=cur_day):
-            self.assertEqual(projectfile.created_at.isoweekday(), cur_day)
+        project_files = ProjectFile.objects.annotate(day_of_week=ExtractIsoWeekDay('created_at')).filter(day_of_week=cur_day)
+        self.assertTrue(project_files.exists())
+        for project_file in project_files:
+            self.assertEqual(project_file.created_at.isoweekday(), cur_day)
+            self.assertEqual(project_file.day_of_week, cur_day)
 
     def test_projects_all(self):
         self.assertGreater(Project.objects.all().count(), 1)
@@ -313,7 +318,8 @@ class TestTag(APITestCase):
     def test_upload_file(self):
         project_id = Project.objects.first().id
         # file_path = Path().resolve().joinpath('media', 'projects', 'ls4_combined.py')
-        file_path = Path().resolve() / 'media' / 'projects' / 'ls4_combined.py'
+        # file_path = Path().resolve() / 'media' / 'projects' / 'ls4_combined.py' # Not stable iteration
+        file_path = Path(__file__).resolve().parents[3] / 'media' / 'projects' / 'ls4_combined.py'
         with open(file_path, 'rb') as fl:
             response = self.client.post(reverse('file-list-view'), data={
                 "name": "hey :DDD",
@@ -377,8 +383,8 @@ class TestTag(APITestCase):
                     datetime(2026, 9, 1)),
                     timezone.make_aware(datetime(2027, 4, 15))) ,
                 'project': project.name,
-                'assignee': User.objects.first().id}
-        response = self.client.post(reverse('task-by-name'), data=task, format='json')
+                'assignee': User.objects.filter(~Q(email='')).first().email}
+        response = self.client.post(reverse('task-post-view'), data=task, format='json')
         self.assertEqual(response.status_code, 201)
 
     def test_task_update_delete(self):
@@ -391,4 +397,40 @@ class TestTag(APITestCase):
         self.assertEqual(response.data['name'], 'test_patch')
         response = self.client.delete(reverse('task-detail-view', args=[task.id]))
         self.assertEqual(response.status_code, 204)
+
+    def test_get_user(self):
+        response = self.client.get(reverse('user-list-view'), query_params={'project': 'New titanic project :D'})
+        self.assertEqual(response.status_code, 200)
+        for user in response.data:
+            self.assertEqual(user['project'][0]['name'], 'New titanic project :D')
+
+    def test_post_user(self):
+        data = {'first_name': 'dadjasndjkasknj', 'last_name': 'dasdladajsjds', 'username': 'das56', 'position': random.choice(Positions.values),
+                'email': 'helloworld@woryahoo.com', 'password': 'super_secure_12345', 're_password': 'super_secure_12345'}
+        response = self.client.post(reverse('user-list-view'), data=data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+    def test_post_task_with_assignee(self):
+        project = random.choice(Project.objects.all())
+        fake = Faker()
+        User = get_user_model()
+        data = {'name': 'fake.unique.word()',
+                'description': fake.paragraph(nb_sentences=random.randint(2, 5)),
+                'status': random.choice(Statuses.values),
+                'priority': random.choice(Priorities.values),
+                'due_date': fake.date_between_dates(timezone.make_aware(
+                    datetime(2026, 9, 1)),
+                    timezone.make_aware(datetime(2027, 4, 15))) ,
+                'project': project.name,
+                'assignee': User.objects.filter(~Q(email='')).first().email}
+        response = self.client.post(reverse('task-post-view'), data=data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+    def test_get_project_file(self):
+        project_file = ProjectFile.objects.first()
+        response = self.client.get(reverse('file-retrieve-view', args=[project_file.id]))
+        self.assertEqual(response.status_code, 200)
+        print(str(b''.join(response.streaming_content)))
+        self.assertEqual(project_file.name, response.filename)
+
 

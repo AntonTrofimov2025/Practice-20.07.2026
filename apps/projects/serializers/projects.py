@@ -15,6 +15,12 @@ class AllProjectFilesSerializer(serializers.ModelSerializer):
         model = ProjectFile
         fields = ['id', 'name', 'file', 'created_at', 'projects']
 
+class DownloadsFileSerializer(serializers.ModelSerializer):
+    attachment = serializers.FileField(use_url=True)
+
+    class Meta:
+        model = ProjectFile
+        fields = ['id', 'name', 'file', 'attachment']
 
 class CreateProjectFileSerializer(serializers.ModelSerializer):
     # file = serializers.FileField(validators=[validate_extension, validate_file_size])

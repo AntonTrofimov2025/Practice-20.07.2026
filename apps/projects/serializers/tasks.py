@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from apps.projects.models import Task, Project
 from . import ProjectSerializer
+from django.contrib.auth import get_user_model
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -11,6 +12,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class TaskCreateUpdateSerializer(serializers.ModelSerializer):
     project = serializers.SlugRelatedField(queryset=Project.objects.all(), slug_field='name')
+    assignee = serializers.SlugRelatedField(queryset=get_user_model().objects.all(), slug_field='email')
 
     class Meta:
         model = Task

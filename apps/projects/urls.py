@@ -28,7 +28,7 @@ urlpatterns = [
     path('projects/', ProjectListApiView.as_view(), name='project-list-view'),
     path('projects/<uuid:pk>', ProjectDetailApiView.as_view(), name='project-detail-view'),
     path('tasks/', projects_.get_all_tasks, name='task-list-view'),
-    path('tasks_by_name/', projects_.post_task_by_name, name='task-by-name'),
+    path('tasks/post/', projects_.post_task, name='task-post-view'),
     # path('tasks/<uuid:pk>', projects_.get_task_by_id),
     path('tasks/<uuid:pk>', TaskDetailAPIView.as_view(), name='task-detail-view'),
     path('tasks/<uuid:pk>/info', projects_.get_task_info),
@@ -36,6 +36,6 @@ urlpatterns = [
     # path('tags/<uuid:pk>', projects_.get_or_upd_tag_by_id),
     path('tags/', TagListCreateApiView.as_view(), name='tag-list-view'),
     path('tags/<uuid:pk>', TagDetailApiView.as_view(), name='tag-detail-view'),
-    path('files/', ProjectFileListAPIView.as_view(), name='file-list-view'),
-    path('files/<uuid:pk>', ProjectDetailApiView.as_view(), name='file-detail-view')
+    path('files/<uuid:pk>', ProjectDetailApiView.as_view(), name='file-detail-view'),
+    path('files/', ProjectFileListAPIView.as_view(), name='file-list-view')
 ]

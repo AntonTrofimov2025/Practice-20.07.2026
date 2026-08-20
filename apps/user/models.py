@@ -1,5 +1,3 @@
-from dis import Positions
-
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.contrib.auth.signals import user_logged_in
@@ -7,6 +5,17 @@ from django.dispatch import receiver
 from apps.projects.models import UniqueID, TimeStampedModel
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+
+class Positions(models.TextChoices):
+    CEO = 'ceo', _('CEO')
+    CTO = 'cto', _('CTO')
+    DESIGNER = 'dsg', _('Designer')
+    PROGRAMMER = 'prg', _('Programmer')
+    PRODUCT_OWNER = 'prdo', _('Product Owner')
+    PROJECT_OWNER = 'pro', _('Project Owner')
+    PROJECT_MANAGER = 'prm', _('Project Manager')
+    QA = 'qa', _('QA')
 
 
 class User(AbstractBaseUser, PermissionsMixin, UniqueID, TimeStampedModel):
@@ -36,17 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin, UniqueID, TimeStampedModel):
         user.last_login = timezone.now()
         user.save()
 
-    class Positions(models.TextChoices):
-        CEO = 'ceo', _('CEO')
-        CTO = 'cto', _('CTO')
-        DESIGNER = 'dsg', _('Designer')
-        PROGRAMMER = 'prg', _('Programmer')
-        PRODUCT_OWNER = 'prdo', _('Product Owner')
-        PROJECT_OWNER = 'pro', _('Project Owner')
-        PROJECT_MANAGER = 'prm', _('Project Manager')
-        QA = 'qa', _('QA')
-
-    position = models.CharField(choices=Positions, verbose_name='Positions')
+    position = models.CharField(max_length=4, choices=Positions, verbose_name='Positions')
 
     objects = UserManager()
 
@@ -54,7 +53,8 @@ class User(AbstractBaseUser, PermissionsMixin, UniqueID, TimeStampedModel):
     REQUIRED_FIELDS = [
                        "first_name",
                        "last_name",
-                       "position"
+                       "position",
+                       "email"
                       ]
 
     def __str__(self):
