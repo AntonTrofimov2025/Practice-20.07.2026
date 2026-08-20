@@ -433,10 +433,21 @@ class TestTag(APITestCase):
         print(str(b''.join(response.streaming_content)))
         self.assertEqual(project_file.name, response.filename)
 
-    def test_get_project_file_negative(self):
+    def test_get_project_file_in_db_negative(self):
         from uuid import UUID
-        response = self.client.get(reverse('file-retrieve-view', args=[UUID('1e096a4c-9596-0000-a690-93a5c7dc600d')]))
+        import uuid
+        # response = self.client.get(reverse('file-retrieve-view', args=[UUID('1e096a4c-9596-0000-a690-93a5c7dc600d')]))
+        response = self.client.get(reverse('file-retrieve-view', args=[uuid.uuid4()]))
         self.assertEqual(response.status_code, 404)
         # self.assertIn('No ProjectFile matches the given query.', response.data['detail'])
-        self.assertIn("File not found, we're sorry", response.data['detail'])
+        self.assertIn("The requested file record does not exist", response.data['detail'])
+
+    def test_get_project_file_from_storage_negative(self):
+        pr_file = ProjectFile.objects.create(name=f'file_123.txt')
+        pr_file.file.name = 'projects/non_existing_file.txt'
+        pr_file.save()
+        response = self.client.get(reverse('file-retrieve-view', args=[pr_file.id]))
+        self.assertEqual(response.status_code, 404)
+        # self.assertIn('No ProjectFile matches the given query.', response.data['detail'])
+        self.assertIn("The file asset is missing from storage", response.data['detail'])
 

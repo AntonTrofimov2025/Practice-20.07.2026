@@ -46,17 +46,17 @@ class DownloadProjectFileView(RetrieveAPIView):
             instance = self.get_object()
         except Http404:
             # return Response(status=status.HTTP_404_NOT_FOUND)
-            raise Http404("File not found, we're sorry")
+            raise Http404("The requested file record does not exist")
 
-        # if instance.file.storage.exists(instance.file.name):
-        #     raise Http404('File not found')
+        # if not instance.file.storage.exists(instance.file.name):
+        #     raise Http404('The file asset is missing from storage')
 
-
-        file = instance.file.open('rb')
-        return FileResponse(file, as_attachment=True, filename=instance.name,
-                            # content_type=content_type
-                            )
-        # except FileNotFoundError:
-        #     # return Response(status=status.HTTP_404_NOT_FOUND)
-        #     raise Http404('File not found')
+        try:
+            file = instance.file.open('rb')
+            return FileResponse(file, as_attachment=True, filename=instance.name,
+                                # content_type=content_type
+                                )
+        except FileNotFoundError:
+            # return Response(status=status.HTTP_404_NOT_FOUND)
+            raise Http404('The file asset is missing from storage')
 
